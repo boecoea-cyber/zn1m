@@ -18,7 +18,7 @@ def start_server():
     server.serve_forever()
 
 # Credenciales
-TELEGRAM_BOT_TOKEN = "8276776398:AAFPAsmft-yF7_MqniQXpm380pSIaV8_Ze0"
+TELEGRAM_BOT_TOKEN = "8294462874:AAE9K4iwnBl2DBJ2TjA9ldcylIwC-x3ejPQ"
 TELEGRAM_CHAT_ID = "-4334361804"
 TWITTER_USER = "financialjuice"
 
