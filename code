@@ -1,8 +1,23 @@
 import asyncio
+import os
+import threading
+from http.server import HTTPServer, BaseHTTPRequestHandler
 import requests
 from twikit import Client
 
-# Configuración de credenciales
+# Servidor HTTP básico para mantener el servicio gratis en Render
+class HealthCheck(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.end_headers()
+        self.wfile.write(b"OK")
+
+def start_server():
+    port = int(os.environ.get("PORT", 10000))
+    server = HTTPServer(('0.0.0.0', port), HealthCheck)
+    server.serve_forever()
+
+# Credenciales
 TELEGRAM_BOT_TOKEN = "8276776398:AAFPAsmft-yF7_MqniQXpm380pSIaV8_Ze0"
 TELEGRAM_CHAT_ID = "-4334361804"
 TWITTER_USER = "financialjuice"
@@ -28,7 +43,7 @@ def enviar_telegram(texto):
 
 async def main():
     global last_tweet_id
-    print("🚀 Iniciando monitor de noticias para ZN1! en Render.com...")
+    print("🚀 Monitor iniciado en Render Free Tier...")
 
     while True:
         try:
@@ -40,17 +55,20 @@ async def main():
                 
                 if latest_tweet.id != last_tweet_id:
                     if last_tweet_id is not None:
-                        print(f"🔔 Nuevo titular detectado: {latest_tweet.text[:50]}...")
+                        print(f"🔔 Nuevo titular: {latest_tweet.text[:50]}...")
                         enviar_telegram(latest_tweet.text)
                     else:
-                        print("📌 Inicializado. Esperando nuevos titulares...")
+                        print("📌 Conectado. Esperando noticias...")
                     
                     last_tweet_id = latest_tweet.id
                     
         except Exception as e:
-            print(f"⚠️ Alerta en el ciclo de búsqueda: {e}")
+            print(f"⚠️ Alerta en búsqueda: {e}")
             
         await asyncio.sleep(30)
 
 if __name__ == "__main__":
+    # Arrancar puerto web en segundo plano
+    threading.Thread(target=start_server, daemon=True).start()
+    # Ejecutar monitor
     asyncio.run(main())
